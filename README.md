@@ -138,6 +138,8 @@ A `BackgroundService` (`ReminderProcessorHostedService`) runs for the lifetime o
 
 **Isolation.** Claiming a reminder and completing a simulated send are each wrapped so one reminder’s unexpected exception is logged and does not stop the poll loop or other concurrent simulations.
 
+**Concurrency and scale.** This take-home uses EF Core In-Memory and a **single** hosted processor in one process. Duplicate claiming is not expected in that setup: the worker claims sequentially, and In-Memory state is not shared across processes. A production deployment with multiple app instances and a shared persistent database would need an atomic claim (for example `UPDATE … WHERE Status = Pending`) and/or distributed locking so two nodes cannot run the same reminder. That is intentionally out of scope. Crash recovery only repairs stale `Running` executions; it is **not** a distributed lock.
+
 ## Time handling
 
 The backend uses **UTC** for scheduling and persistence. Incoming `ScheduledAt` values are normalized to UTC. Eligibility compares `ScheduledAt` to `DateTime.UtcNow`. Execution `StartedAt` / `CompletedAt` and reminder `CreatedAt` / `UpdatedAt` are UTC.
