@@ -148,6 +148,12 @@ static JwtOptions BindJwtOptions(WebApplicationBuilder builder)
 
     if (string.IsNullOrWhiteSpace(options.Key))
     {
+        if (!builder.Environment.IsDevelopment())
+        {
+            throw new InvalidOperationException(
+                "Jwt:Key must be configured when the application is not running in Development.");
+        }
+
         // Development-only fallback so the API runs after a clone without extra secrets.
         // Override Jwt:Key in configuration or environment for any non-local use.
         options.Key = "DEV-ONLY-do-not-use-in-production-scheduled-reminders-signing-key";
