@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScheduledReminders.Api", "backend\ScheduledReminders.Api.csproj", "{FE024D6C-7F2A-4F4D-A41D-75342206FE4E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9EAB42B9-D01D-4C14-B7C1-D75906B3A4C0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScheduledReminders.Api.Tests", "tests\ScheduledReminders.Api.Tests\ScheduledReminders.Api.Tests.csproj", "{A5471D49-5898-4370-8366-ED1B275874B5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FE024D6C-7F2A-4F4D-A41D-75342206FE4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE024D6C-7F2A-4F4D-A41D-75342206FE4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE024D6C-7F2A-4F4D-A41D-75342206FE4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE024D6C-7F2A-4F4D-A41D-75342206FE4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5471D49-5898-4370-8366-ED1B275874B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5471D49-5898-4370-8366-ED1B275874B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5471D49-5898-4370-8366-ED1B275874B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5471D49-5898-4370-8366-ED1B275874B5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A5471D49-5898-4370-8366-ED1B275874B5} = {9EAB42B9-D01D-4C14-B7C1-D75906B3A4C0}
+	EndGlobalSection
+EndGlobal

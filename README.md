@@ -19,6 +19,16 @@ dotnet run
 
 The API listens on **http://localhost:5288**.
 
+### Run tests
+
+From the repository root:
+
+```bash
+dotnet test
+```
+
+The suite targets reminder create/claim/complete behavior and login roles (`tests/ScheduledReminders.Api.Tests`). HTTP Admin vs Viewer authorization is enforced in the API endpoints and is not covered here, to avoid changing production `Program.cs` for `WebApplicationFactory`.
+
 ### Run the Angular app
 
 In a second terminal:
