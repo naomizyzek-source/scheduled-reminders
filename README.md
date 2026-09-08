@@ -87,6 +87,7 @@ Do not commit production secrets. `appsettings.Development.json` contains a **de
 
 - `PollIntervalSeconds` (default `1`) — how often the worker looks for due reminders.
 - `SimulationDelaySeconds` (default `10`) — simulated send duration.
+- `StaleRunningThresholdSeconds` (default `30`) — how old a `Running` execution with no `CompletedAt` must be before startup/poll recovery marks it Failed. The effective threshold is never shorter than the simulation delay plus one second, so an in-flight send is not treated as crashed.
 
 The Angular API base URL is `frontend/src/environments/environment.ts` (`http://localhost:5288`).
 
@@ -117,7 +118,9 @@ A `BackgroundService` (`ReminderProcessorHostedService`) runs for the lifetime o
 - `ScheduledAt <= DateTime.UtcNow`
 - `FutureRunsCount > 0`
 
-**Claim before wait.** Each eligible reminder is claimed **sequentially** in that cycle: `Pending` → `Running`, a `ReminderExecution` row is created with `Status = Running` and `StartedAt` (UTC), and `SaveChangesAsync` runs **before** the next reminder is claimed and **before** any 10-second wait. Because only one writer polls, that persisted claim is enough to stop the same reminder from being picked again while it is `Running`. No extra locks, tokens, or brokers are used.
+**Claim before wait.** Each eligible reminder is claimed **sequentially** in that cycle: `Pending` → `Running`, a `ReminderExecution` row is created with `Status = Running` and `StartedAt` (UTC), and `SaveChangesAsync` runs **before** the next reminder is claimed and **before** any 10-second wait. Because only one writer polls, that persisted claim is enough to stop the same reminder from being picked again while it is `Running`. No extra locks, tokens, or brokers are used. Each cycle runs stale-execution recovery **before** claiming, in the same DI scope.
+
+**Crash recovery.** If the process dies during the simulated wait, a reminder can remain `Running` with an execution that has no `CompletedAt`. Those rows are ignored by the normal eligibility filter. Recovery looks only for executions that are still `Running`, have no `CompletedAt`, and whose `StartedAt` is older than the stale threshold (UTC). It marks that execution `Failed` (with `CompletedAt`), sets the reminder back to `Pending` when it is still `Running`, and does **not** change `FutureRunsCount`, `ScheduledAt`, or `IsActive`. Recurrence therefore stays intact; the next claim is a new attempt. Recovery is idempotent. In-Memory data is still lost on process exit; recovery matters if the same in-memory process leaves orphans after an exception, or if a durable database is used later.
 
 **Concurrent simulation.** After all claims in the cycle are saved, each claimed reminder’s 10-second simulated send runs **concurrently** (`Task.WhenAll`). Each task creates a **new DI scope** via `IServiceScopeFactory` and therefore a **new `DbContext`**. `DbContext` is not shared across threads.
 
@@ -131,7 +134,7 @@ A `BackgroundService` (`ReminderProcessorHostedService`) runs for the lifetime o
 
 **FutureRunsCount** is only consumed when an execution actually runs (claim + simulated send). It is not derived from frequency.
 
-**Cancellation.** `Task.Delay` uses the hosted-service stopping token. `OperationCanceledException` from shutdown is not caught and rewritten as `Failed`. An in-flight execution may remain `Running` with a null `CompletedAt` if the process stops during the wait.
+**Cancellation.** `Task.Delay` uses the hosted-service stopping token. `OperationCanceledException` from shutdown is not caught and rewritten as `Failed` at that moment. If the process keeps running or later restarts with persisted data, a `Running` execution older than the stale threshold is recovered as Failed and the reminder returns to Pending without consuming `FutureRunsCount`.
 
 **Isolation.** Claiming a reminder and completing a simulated send are each wrapped so one reminder’s unexpected exception is logged and does not stop the poll loop or other concurrent simulations.
 
@@ -161,7 +164,7 @@ A simulated **Failed** result still counts as an execution: it is recorded, `Fut
 - Invalid credentials on login return **401 Unauthorized** without distinguishing unknown user vs wrong password.
 - In-Memory data is lost on process restart.
 - Angular UI restrictions are not a substitute for API authorization.
-- Shutdown during the simulated wait does not mark the execution Failed; it may stay Running.
+- Shutdown during the simulated wait does not immediately mark the execution Failed. A `Running` execution with no `CompletedAt` older than `StaleRunningThresholdSeconds` is recovered as Failed and the reminder returns to Pending without decrementing `FutureRunsCount`.
 
 ## AI Usage Disclosure
 

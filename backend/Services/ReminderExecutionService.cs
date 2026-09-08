@@ -8,6 +8,7 @@ namespace ScheduledReminders.Api.Services;
 
 public interface IReminderExecutionService
 {
+    Task RecoverStaleRunningAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ClaimedExecution>> ClaimDueRemindersAsync(CancellationToken cancellationToken = default);
     Task RunSimulatedExecutionAsync(Guid reminderId, Guid executionId, CancellationToken cancellationToken = default);
 }
@@ -17,6 +18,7 @@ public class ReminderExecutionService : IReminderExecutionService
     private readonly AppDbContext _db;
     private readonly ILogger<ReminderExecutionService> _logger;
     private readonly TimeSpan _simulationDelay;
+    private readonly TimeSpan _staleThreshold;
 
     public ReminderExecutionService(
         AppDbContext db,
@@ -25,8 +27,52 @@ public class ReminderExecutionService : IReminderExecutionService
     {
         _db = db;
         _logger = logger;
-        var seconds = Math.Max(1, options.Value.SimulationDelaySeconds);
-        _simulationDelay = TimeSpan.FromSeconds(seconds);
+        var delaySeconds = Math.Max(1, options.Value.SimulationDelaySeconds);
+        _simulationDelay = TimeSpan.FromSeconds(delaySeconds);
+
+        var configuredStaleSeconds = options.Value.StaleRunningThresholdSeconds > 0
+            ? options.Value.StaleRunningThresholdSeconds
+            : delaySeconds + 20;
+        // Never treat an in-flight simulated send as stale.
+        _staleThreshold = TimeSpan.FromSeconds(Math.Max(configuredStaleSeconds, delaySeconds + 1));
+    }
+
+    public async Task RecoverStaleRunningAsync(CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+        var cutoff = now - _staleThreshold;
+
+        var staleExecutions = await _db.ReminderExecutions
+            .Include(e => e.Reminder)
+            .Where(e =>
+                e.Status == ReminderStatus.Running &&
+                e.CompletedAt == null &&
+                e.StartedAt <= cutoff)
+            .ToListAsync(cancellationToken);
+
+        if (staleExecutions.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var execution in staleExecutions)
+        {
+            execution.Status = ReminderStatus.Failed;
+            execution.CompletedAt = now;
+
+            if (execution.Reminder.Status == ReminderStatus.Running)
+            {
+                execution.Reminder.Status = ReminderStatus.Pending;
+                execution.Reminder.UpdatedAt = now;
+            }
+
+            _logger.LogWarning(
+                "Recovered stale running execution {ExecutionId} for reminder {ReminderId}. Reminder returned to Pending without changing FutureRunsCount.",
+                execution.Id,
+                execution.ReminderId);
+        }
+
+        await _db.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyList<ClaimedExecution>> ClaimDueRemindersAsync(CancellationToken cancellationToken = default)

@@ -41,6 +41,7 @@ public class ReminderProcessorHostedService : BackgroundService
         {
             using var scope = _scopeFactory.CreateScope();
             var executions = scope.ServiceProvider.GetRequiredService<IReminderExecutionService>();
+            await executions.RecoverStaleRunningAsync(stoppingToken);
             claimed = await executions.ClaimDueRemindersAsync(stoppingToken);
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)

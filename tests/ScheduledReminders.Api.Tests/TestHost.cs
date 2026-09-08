@@ -21,12 +21,16 @@ internal static class TestHost
 
     public static ReminderService CreateReminderService(AppDbContext db) => new(db);
 
-    public static ReminderExecutionService CreateExecutionService(AppDbContext db, int simulationDelaySeconds = 1)
+    public static ReminderExecutionService CreateExecutionService(
+        AppDbContext db,
+        int simulationDelaySeconds = 1,
+        int staleRunningThresholdSeconds = 30)
     {
         var options = Options.Create(new ReminderProcessorOptions
         {
             PollIntervalSeconds = 1,
-            SimulationDelaySeconds = simulationDelaySeconds
+            SimulationDelaySeconds = simulationDelaySeconds,
+            StaleRunningThresholdSeconds = staleRunningThresholdSeconds
         });
         return new ReminderExecutionService(db, options, NullLogger<ReminderExecutionService>.Instance);
     }
