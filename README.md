@@ -94,7 +94,7 @@ CORS is enabled for `http://localhost:4200` and `http://127.0.0.1:4200`.
 
 **Role-based authorization on the backend** is the security boundary. GET (including execution history) is allowed for Admin and Viewer. POST and PUT require Admin. A Viewer token receives **403 Forbidden** on Admin-only operations. Angular route guards hide create/edit routes as a UX layer only.
 
-**Angular** is a standalone client: login, reminder list/detail/form, JWT interceptor, `authGuard` / `adminGuard`.
+**Angular state management.** Authentication state lives in `AuthService` as a `BehaviorSubject`, so the shell and routes can react to login and logout without a global store. The current session (JWT, username, role, expiry) is persisted in `localStorage` so a refresh restores the user until the token expires. An HTTP interceptor attaches `Authorization: Bearer <token>` on API calls when a session exists. Route guards (`authGuard`, `adminGuard`) hide Admin-only screens (create/edit); they are a UX layer only — the API still enforces roles. NgRx and similar libraries were not used: the app’s state is small (session plus per-screen HTTP data), and a service-based `BehaviorSubject` keeps the client lightweight while still providing reactive auth state.
 
 ## Background processing
 
