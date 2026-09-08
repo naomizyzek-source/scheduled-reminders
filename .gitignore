@@ -1,0 +1,41 @@
+## .NET
+bin/
+obj/
+out/
+[Bb]uild/
+[Ll]og/
+[Ll]ogs/
+artifacts/
+TestResults/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.pidb
+*.svclog
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## IDE
+.vs/
+.vscode/
+.idea/
+*.swp
+*~
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Secrets / local config
+appsettings.*.local.json
+*.pfx
+*.key
+
+## Misc
+*.log
+.env
+.env.local
