@@ -90,7 +90,8 @@ public class ReminderService : IReminderService
         var executions = await _db.ReminderExecutions
             .AsNoTracking()
             .Where(e => e.ReminderId == reminderId)
-            .OrderByDescending(e => e.ExecutedAt)
+            .OrderByDescending(e => e.StartedAt)
+            .ThenByDescending(e => e.Id)
             .ToListAsync(cancellationToken);
 
         return executions.Select(ReminderExecutionResponse.FromEntity).ToList();

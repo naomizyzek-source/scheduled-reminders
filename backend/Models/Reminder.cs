@@ -12,4 +12,5 @@ public class Reminder
     public ReminderStatus Status { get; set; } = ReminderStatus.Pending;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public ICollection<ReminderExecution> Executions { get; set; } = new List<ReminderExecution>();
 }

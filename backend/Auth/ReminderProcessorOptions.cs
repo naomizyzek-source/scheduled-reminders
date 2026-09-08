@@ -4,5 +4,6 @@ public class ReminderProcessorOptions
 {
     public const string SectionName = "ReminderProcessor";
 
-    public int PollIntervalSeconds { get; set; } = 5;
+    public int PollIntervalSeconds { get; set; } = 1;
+    public int SimulationDelaySeconds { get; set; } = 10;
 }

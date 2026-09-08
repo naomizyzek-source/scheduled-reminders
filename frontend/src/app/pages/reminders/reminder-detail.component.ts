@@ -39,7 +39,7 @@ import { Reminder, ReminderExecution } from '../../models/models';
 
       <section class="history">
         <h2>Execution history</h2>
-        <p class="muted">Each cycle simulates a send and records the outcome. Recurring reminders decrement FutureRunsCount and move ScheduledAt forward.</p>
+        <p class="muted">Each attempt is recorded, including Failed sends. Recurring reminders consume one FutureRunsCount per attempt and reschedule when runs remain.</p>
 
         @if (executions.length === 0) {
           <div class="empty compact">
@@ -51,17 +51,17 @@ import { Reminder, ReminderExecution } from '../../models/models';
             <table>
               <thead>
                 <tr>
-                  <th>Executed</th>
+                  <th>Started</th>
+                  <th>Completed</th>
                   <th>Status</th>
-                  <th>Detail</th>
                 </tr>
               </thead>
               <tbody>
                 @for (item of executions; track item.id) {
                   <tr>
-                    <td>{{ item.executedAt | date: 'medium' }}</td>
+                    <td>{{ item.startedAt | date: 'medium' }}</td>
+                    <td>{{ item.completedAt ? (item.completedAt | date: 'medium') : '—' }}</td>
                     <td><span class="status" [attr.data-status]="item.status">{{ item.status }}</span></td>
-                    <td>{{ item.detail }}</td>
                   </tr>
                 }
               </tbody>

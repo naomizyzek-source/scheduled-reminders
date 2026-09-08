@@ -14,7 +14,7 @@ import { Reminder } from '../../models/models';
     <div class="page-head">
       <div>
         <h1>Reminders</h1>
-        <p>Due items are processed every 5 seconds. Delivery is simulated — nothing is emailed.</p>
+        <p>Due items are claimed within about a second. A simulated send then runs for 10 seconds. Delivery is simulated — nothing is emailed.</p>
       </div>
       @if (auth.isAdmin()) {
         <a class="button" routerLink="/reminders/new">Create reminder</a>

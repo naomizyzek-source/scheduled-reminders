@@ -31,14 +31,18 @@ public class AppDbContext : DbContext
             entity.Property(r => r.Message).HasMaxLength(2000).IsRequired();
             entity.Property(r => r.Frequency).HasConversion<string>().HasMaxLength(32);
             entity.Property(r => r.Status).HasConversion<string>().HasMaxLength(32);
+            entity.HasMany(r => r.Executions)
+                .WithOne(e => e.Reminder)
+                .HasForeignKey(e => e.ReminderId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<ReminderExecution>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Status).HasConversion<string>().HasMaxLength(32);
-            entity.Property(e => e.Detail).HasMaxLength(4000).IsRequired();
             entity.HasIndex(e => e.ReminderId);
+            entity.HasIndex(e => e.StartedAt);
         });
     }
 }

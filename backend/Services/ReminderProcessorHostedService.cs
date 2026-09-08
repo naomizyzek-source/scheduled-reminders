@@ -24,30 +24,66 @@ public class ReminderProcessorHostedService : BackgroundService
     {
         _logger.LogInformation("Reminder processor started. Poll interval: {Interval}.", _pollInterval);
 
-        await ProcessOnceAsync(stoppingToken);
-
         using var timer = new PeriodicTimer(_pollInterval);
+
+        await RunCycleAsync(stoppingToken);
+
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
-            await ProcessOnceAsync(stoppingToken);
+            await RunCycleAsync(stoppingToken);
         }
     }
 
-    private async Task ProcessOnceAsync(CancellationToken stoppingToken)
+    private async Task RunCycleAsync(CancellationToken stoppingToken)
+    {
+        IReadOnlyList<ClaimedExecution> claimed;
+        try
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var executions = scope.ServiceProvider.GetRequiredService<IReminderExecutionService>();
+            claimed = await executions.ClaimDueRemindersAsync(stoppingToken);
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            return;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Reminder processor claim cycle failed. Polling will continue.");
+            return;
+        }
+
+        if (claimed.Count == 0)
+        {
+            return;
+        }
+
+        var tasks = claimed.Select(item => RunClaimedExecutionAsync(item, stoppingToken));
+        await Task.WhenAll(tasks);
+    }
+
+    private async Task RunClaimedExecutionAsync(ClaimedExecution claimed, CancellationToken stoppingToken)
     {
         try
         {
             using var scope = _scopeFactory.CreateScope();
-            var processor = scope.ServiceProvider.GetRequiredService<IReminderProcessor>();
-            await processor.ProcessDueRemindersAsync(stoppingToken);
+            var executions = scope.ServiceProvider.GetRequiredService<IReminderExecutionService>();
+            await executions.RunSimulatedExecutionAsync(claimed.ReminderId, claimed.ExecutionId, stoppingToken);
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {
-            // shutdown
+            _logger.LogInformation(
+                "Reminder {ReminderId} execution {ExecutionId} cancelled because the application is stopping.",
+                claimed.ReminderId,
+                claimed.ExecutionId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Reminder processor cycle failed.");
+            _logger.LogError(
+                ex,
+                "Reminder {ReminderId} execution {ExecutionId} failed unexpectedly. Other reminders will continue.",
+                claimed.ReminderId,
+                claimed.ExecutionId);
         }
     }
 }

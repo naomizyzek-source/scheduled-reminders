@@ -32,7 +32,7 @@ builder.Services.Configure<ReminderProcessorOptions>(
     builder.Configuration.GetSection(ReminderProcessorOptions.SectionName));
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IReminderService, ReminderService>();
-builder.Services.AddScoped<IReminderProcessor, ReminderProcessor>();
+builder.Services.AddScoped<IReminderExecutionService, ReminderExecutionService>();
 builder.Services.AddHostedService<ReminderProcessorHostedService>();
 
 builder.Services.AddCors(options =>

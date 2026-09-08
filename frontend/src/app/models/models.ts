@@ -33,7 +33,7 @@ export interface ReminderRequest {
 export interface ReminderExecution {
   id: string;
   reminderId: string;
-  executedAt: string;
+  startedAt: string;
+  completedAt: string | null;
   status: ReminderStatus;
-  detail: string;
 }
