@@ -28,8 +28,12 @@ builder.Services.Configure<JwtOptions>(options =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseInMemoryDatabase("ScheduledReminders"));
 
+builder.Services.Configure<ReminderProcessorOptions>(
+    builder.Configuration.GetSection(ReminderProcessorOptions.SectionName));
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IReminderService, ReminderService>();
+builder.Services.AddScoped<IReminderProcessor, ReminderProcessor>();
+builder.Services.AddHostedService<ReminderProcessorHostedService>();
 
 builder.Services.AddCors(options =>
 {
@@ -69,7 +73,7 @@ builder.Services.AddSwaggerGen(options =>
     {
         Title = "Scheduled Reminders API",
         Version = "v1",
-        Description = "Backend foundation for the scheduled reminders take-home assignment."
+        Description = "Scheduled reminders API with JWT auth, simulated execution, and execution history."
     });
 
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

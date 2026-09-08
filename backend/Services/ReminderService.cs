@@ -41,7 +41,7 @@ public class ReminderService : IReminderService
             Id = Guid.NewGuid(),
             Name = request.Name.Trim(),
             Message = request.Message.Trim(),
-            ScheduledAt = request.ScheduledAt!.Value,
+            ScheduledAt = ToUtc(request.ScheduledAt!.Value),
             Frequency = request.Frequency,
             IsActive = request.IsActive,
             FutureRunsCount = request.FutureRunsCount,
@@ -66,7 +66,7 @@ public class ReminderService : IReminderService
 
         reminder.Name = request.Name.Trim();
         reminder.Message = request.Message.Trim();
-        reminder.ScheduledAt = request.ScheduledAt!.Value;
+        reminder.ScheduledAt = ToUtc(request.ScheduledAt!.Value);
         reminder.Frequency = request.Frequency;
         reminder.IsActive = request.IsActive;
         reminder.FutureRunsCount = request.FutureRunsCount;
@@ -76,4 +76,30 @@ public class ReminderService : IReminderService
 
         return ReminderResponse.FromEntity(reminder);
     }
+
+    public async Task<IReadOnlyList<ReminderExecutionResponse>?> GetExecutionsAsync(
+        Guid reminderId,
+        CancellationToken cancellationToken = default)
+    {
+        var exists = await _db.Reminders.AnyAsync(r => r.Id == reminderId, cancellationToken);
+        if (!exists)
+        {
+            return null;
+        }
+
+        var executions = await _db.ReminderExecutions
+            .AsNoTracking()
+            .Where(e => e.ReminderId == reminderId)
+            .OrderByDescending(e => e.ExecutedAt)
+            .ToListAsync(cancellationToken);
+
+        return executions.Select(ReminderExecutionResponse.FromEntity).ToList();
+    }
+
+    private static DateTime ToUtc(DateTime value) => value.Kind switch
+    {
+        DateTimeKind.Utc => value,
+        DateTimeKind.Local => value.ToUniversalTime(),
+        _ => DateTime.SpecifyKind(value, DateTimeKind.Utc)
+    };
 }

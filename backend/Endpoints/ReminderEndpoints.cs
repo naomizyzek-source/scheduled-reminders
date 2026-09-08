@@ -40,6 +40,12 @@ public static class ReminderEndpoints
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status403Forbidden);
 
+        group.MapGet("/{id:guid}/executions", GetExecutions)
+            .WithName("GetReminderExecutions")
+            .RequireAuthorization(policy => policy.RequireRole(Roles.Admin, Roles.Viewer))
+            .Produces<IReadOnlyList<ReminderExecutionResponse>>()
+            .Produces(StatusCodes.Status404NotFound);
+
         return app;
     }
 
@@ -93,5 +99,16 @@ public static class ReminderEndpoints
         return updated is null
             ? TypedResults.NotFound()
             : TypedResults.Ok(updated);
+    }
+
+    private static async Task<Results<Ok<IReadOnlyList<ReminderExecutionResponse>>, NotFound>> GetExecutions(
+        Guid id,
+        IReminderService reminderService,
+        CancellationToken cancellationToken)
+    {
+        var executions = await reminderService.GetExecutionsAsync(id, cancellationToken);
+        return executions is null
+            ? TypedResults.NotFound()
+            : TypedResults.Ok(executions);
     }
 }

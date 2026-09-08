@@ -10,6 +10,7 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<Reminder> Reminders => Set<Reminder>();
+    public DbSet<ReminderExecution> ReminderExecutions => Set<ReminderExecution>();
     public DbSet<AppUser> Users => Set<AppUser>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -30,6 +31,14 @@ public class AppDbContext : DbContext
             entity.Property(r => r.Message).HasMaxLength(2000).IsRequired();
             entity.Property(r => r.Frequency).HasConversion<string>().HasMaxLength(32);
             entity.Property(r => r.Status).HasConversion<string>().HasMaxLength(32);
+        });
+
+        modelBuilder.Entity<ReminderExecution>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Status).HasConversion<string>().HasMaxLength(32);
+            entity.Property(e => e.Detail).HasMaxLength(4000).IsRequired();
+            entity.HasIndex(e => e.ReminderId);
         });
     }
 }
