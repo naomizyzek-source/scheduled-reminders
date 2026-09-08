@@ -29,7 +29,7 @@ npm install
 npm start
 ```
 
-The UI listens on **http://localhost:4200** and calls the API at `http://localhost:5288`. CORS is already enabled for that origin.
+The UI listens on **http://localhost:4200** and calls the API at `http://localhost:5288`. CORS allows `http://localhost:4200` and `http://127.0.0.1:4200`.
 
 ### In-Memory database
 
@@ -76,7 +76,7 @@ Do not commit production secrets. `appsettings.Development.json` contains a **de
 
 The Angular API base URL is `frontend/src/environments/environment.ts` (`http://localhost:5288`).
 
-CORS is enabled for `http://localhost:4200`.
+CORS is enabled for `http://localhost:4200` and `http://127.0.0.1:4200`.
 
 ## Architecture & Technology Decisions
 
