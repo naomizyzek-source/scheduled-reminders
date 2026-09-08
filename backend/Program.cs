@@ -57,6 +57,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+builder.Services.Configure<RouteHandlerOptions>(options =>
+{
+    // Invalid JSON / unsupported Frequency should be 400, not a development exception dump.
+    options.ThrowOnBadRequest = false;
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
