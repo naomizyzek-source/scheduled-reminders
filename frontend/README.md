@@ -1,10 +1,10 @@
-# Angular client
+# לקוח Angular
 
-See the repository root [README.md](../README.md) for credentials, API URL, and how to run both projects.
+ראו את [README.md](../README.md) בשורש הריפוזיטורי לפרטי התחברות, כתובת ה-API והרצת שני הפרויקטים.
 
 ```bash
 npm install
 npm start
 ```
 
-Opens http://localhost:4200 against the API at http://localhost:5288.
+נפתח http://localhost:4200 מול ה-API בכתובת http://localhost:5288.

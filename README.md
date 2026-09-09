@@ -1,15 +1,15 @@
-# Scheduled Reminders
+# תזכורות מתוזמנות (Scheduled Reminders)
 
-Take-home full-stack assignment: scheduled reminders with JWT authentication, role-based access, a simulated execution worker, and an Angular UI.
+משימת בית מלאה (full-stack): תזכורות מתוזמנות עם אימות JWT, הרשאות לפי תפקיד, תהליך רקע שמבצע שליחה מדומה, וממשק Angular.
 
-## Getting Started
+## תחילת עבודה
 
-### Prerequisites
+### דרישות מקדימות
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [Node.js 18+](https://nodejs.org/) (for the Angular app)
+- [Node.js 18+](https://nodejs.org/) (לאפליקציית Angular)
 
-### Run the backend
+### הרצת ה-backend
 
 ```bash
 cd backend
@@ -17,21 +17,21 @@ dotnet restore
 dotnet run
 ```
 
-The API listens on **http://localhost:5288**.
+ה-API מאזין בכתובת **http://localhost:5288**.
 
-### Run tests
+### הרצת בדיקות
 
-From the repository root:
+משורש הריפוזיטורי:
 
 ```bash
 dotnet test
 ```
 
-The suite targets reminder create/claim/complete behavior and login roles (`tests/ScheduledReminders.Api.Tests`). HTTP Admin vs Viewer authorization is enforced in the API endpoints and is not covered here, to avoid changing production `Program.cs` for `WebApplicationFactory`.
+הסוויטה בודקת יצירה/תפיסה/השלמה של תזכורות ותפקידי התחברות (`tests/ScheduledReminders.Api.Tests`). הרשאות HTTP של Admin מול Viewer נאכפות בנקודות הקצה של ה-API ואינן מכוסות כאן, כדי לא לשנות את `Program.cs` של הייצור לצורך `WebApplicationFactory`.
 
-### Run the Angular app
+### הרצת אפליקציית Angular
 
-In a second terminal:
+בטרמינל שני:
 
 ```bash
 cd frontend
@@ -39,144 +39,146 @@ npm install
 npm start
 ```
 
-The UI listens on **http://localhost:4200** and calls the API at `http://localhost:5288`. CORS allows `http://localhost:4200` and `http://127.0.0.1:4200`.
+הממשק מאזין בכתובת **http://localhost:4200** ופונה ל-API ב-`http://localhost:5288`. CORS מורשה ל-`http://localhost:4200` ול-`http://127.0.0.1:4200`.
 
-### In-Memory database
+קוד הפרונט נמצא בתיקייה `frontend/` בשורש הריפוזיטורי (Angular 18: מסכי התחברות, רשימה, יצירה/עריכה ופירוט עם היסטוריית ביצוע).
 
-The API uses **EF Core In-Memory**. Data lives only in the running process:
+### מסד נתונים In-Memory
 
-- Seeded users are created on startup.
-- Reminders and execution history exist only while the process is running.
-- Restarting the API resets reminders and history (users are re-seeded).
+ה-API משתמש ב-**EF Core In-Memory**. הנתונים חיים רק בתהליך הרץ:
 
-No SQL Server, Docker, or connection string is required.
+- משתמשים מאותחלים נוצרים בעלייה.
+- תזכורות והיסטוריית ביצוע קיימות רק כל עוד התהליך רץ.
+- הפעלה מחדש של ה-API מאפסת תזכורות והיסטוריה (המשתמשים מאותחלים מחדש).
 
-### How to run / test
+אין צורך ב-SQL Server, Docker או מחרוזת חיבור.
 
-1. Start the backend, then the Angular app.
-2. Sign in as Admin or Viewer.
-3. As Admin, create a reminder scheduled a few seconds in the past (`IsActive = true`, `FutureRunsCount >= 1`). Status starts as **Pending**.
-4. Within about one second it should move to **Running** for ~10 seconds, then **Success** or **Failed**.
-5. Open the reminder detail page (or `GET /api/reminders/{id}/executions`) for history, most recent first.
+### איך להריץ / לבדוק
 
-API-only testing: http://localhost:5288/swagger — log in, click **Authorize**, paste the JWT.
+1. להפעיל את ה-backend ואז את אפליקציית Angular.
+2. להתחבר כ-Admin או כ-Viewer.
+3. כ-Admin, ליצור תזכורת שמתוזמנת כמה שניות בעבר (`IsActive = true`, `FutureRunsCount >= 1`). הסטטוס מתחיל כ-**Pending**.
+4. תוך כשנייה היא אמורה לעבור ל-**Running** למשך כ-10 שניות, ואז ל-**Success** או **Failed**.
+5. לפתוח את מסך הפירוט (או `GET /api/reminders/{id}/executions`) להיסטוריה, מהחדש לישן.
 
-### Seeded credentials
+בדיקה דרך ה-API בלבד: http://localhost:5288/swagger — להתחבר, ללחוץ **Authorize**, ולהדביק את ה-JWT.
 
-| Role   | Username | Password    |
+### חשבונות מאותחלים
+
+| תפקיד | שם משתמש | סיסמה |
 |--------|----------|-------------|
 | Admin  | `admin`  | `Admin123!` |
 | Viewer | `viewer` | `Viewer123!` |
 
-### Swagger URL
+### כתובת Swagger
 
 http://localhost:5288/swagger
 
-### Configuration
+### הגדרות
 
-JWT settings live under the `Jwt` section in `backend/appsettings.json`:
+הגדרות JWT נמצאות תחת הסעיף `Jwt` ב-`backend/appsettings.json`:
 
 - `Issuer`
 - `Audience`
 - `ExpiryHours` (8)
-- `Key` — signing key
+- `Key` — מפתח החתימה
 
-Do not commit production secrets. `appsettings.Development.json` contains a **development-only** signing key. If `Jwt:Key` is empty, the application falls back to the same development key so the project runs immediately after cloning. Override `Jwt__Key` via environment variables for anything other than local evaluation.
+אין לקממט סודות ייצור. `appsettings.Development.json` מכיל מפתח חתימה **לפיתוח בלבד**. בסביבת **Development**, אם `Jwt:Key` ריק, היישום נופל חזרה לאותו מפתח פיתוח כדי שהפרויקט ירוץ מיד אחרי clone. בסביבות **שאינן Development** (כולל Production) חובה להגדיר את `Jwt:Key` (למשל דרך `Jwt__Key`). אם המפתח חסר או ריק מחוץ ל-Development, ה-API **נכשל מיד בעלייה** ואינו משתמש במפתח הדמו.
 
-`ReminderProcessor` settings:
+הגדרות `ReminderProcessor`:
 
-- `PollIntervalSeconds` (default `1`) — how often the worker looks for due reminders.
-- `SimulationDelaySeconds` (default `10`) — simulated send duration.
-- `StaleRunningThresholdSeconds` (default `30`) — how old a `Running` execution with no `CompletedAt` must be before startup/poll recovery marks it Failed. The effective threshold is never shorter than the simulation delay plus one second, so an in-flight send is not treated as crashed.
+- `PollIntervalSeconds` (ברירת מחדל `1`) — מרווח הסריקה בשניות: באיזו תדירות העובד מחפש תזכורות לפירעון.
+- `SimulationDelaySeconds` (ברירת מחדל `10`) — משך השליחה המדומה.
+- `StaleRunningThresholdSeconds` (ברירת מחדל `30`) — כמה זמן ביצוע בסטטוס `Running` בלי `CompletedAt` חייב להיות ישן לפני ששחזור בעלייה/סקר מסמן אותו כ-Failed. הסף האפקטיבי לעולם אינו קצר ממשך הסימולציה ועוד שנייה אחת, כדי ששליחה פעילה לא תטופל כקריסה.
 
-The Angular API base URL is `frontend/src/environments/environment.ts` (`http://localhost:5288`).
+כתובת הבסיס של ה-API באנגולר היא `frontend/src/environments/environment.ts` (`http://localhost:5288`).
 
-CORS is enabled for `http://localhost:4200` and `http://127.0.0.1:4200`.
+CORS מופעל עבור `http://localhost:4200` ו-`http://127.0.0.1:4200`.
 
-## Architecture & Technology Decisions
+## ארכיטקטורה והחלטות טכנולוגיות
 
-**Minimal API** was selected because the assignment specifies it, and the surface area is small enough that endpoint mapping stays readable without controllers.
+**Minimal API** נבחר כי המשימה מחייבת אותו, ושטח הפנים קטן מספיק כדי שמיפוי נקודות הקצה יישאר קריא בלי controllers.
 
-**EF Core In-Memory** was selected so evaluators can clone and run the API without installing a database.
+**EF Core In-Memory** נבחר כדי שמעריכים יוכלו לשכפל ולהריץ את ה-API בלי להתקין מסד נתונים.
 
-**ReminderService** holds create/update/read rules (including `Status = Pending` on create) and execution-history queries. Endpoint files bind, validate, authorize, and map HTTP results.
+**ReminderService** מחזיק כללי יצירה/עדכון/קריאה (כולל `Status = Pending` ביצירה) ושאילתות היסטוריית ביצוע. קבצי ה-endpoints מבצעים bind, ולידציה, הרשאה ומיפוי לתוצאות HTTP.
 
-**JWT** authenticates the Angular client. The backend issues and validates issuer, audience, lifetime, and signing key. A role claim on the token is not trusted from the client body — it is issued at login from the seeded user record.
+**JWT** מאמת את לקוח Angular. ה-backend מנפיק ומוודא issuer, audience, תוקף ומפתח חתימה. תביעת התפקיד בטוקן אינה נלקחת מגוף בקשת הלקוח — היא מונפקת בהתחברות מתוך רשומת המשתמש המאותחל.
 
-**Role-based authorization on the backend** is the security boundary. GET (including execution history) is allowed for Admin and Viewer. POST and PUT require Admin. A Viewer token receives **403 Forbidden** on Admin-only operations. Angular route guards hide create/edit routes as a UX layer only.
+**הרשאה לפי תפקיד ב-backend** היא גבול האבטחה. GET (כולל היסטוריית ביצוע) מותר ל-Admin ול-Viewer. POST ו-PUT דורשים Admin. טוקן Viewer מקבל **403 Forbidden** בפעולות שמיועדות ל-Admin בלבד. שומרי הנתיב באנגולר מסתירים מסכי יצירה/עריכה כשכבת UX בלבד.
 
-**Angular state management.** Authentication state lives in `AuthService` as a `BehaviorSubject`, so the shell and routes can react to login and logout without a global store. The current session (JWT, username, role, expiry) is persisted in `localStorage` so a refresh restores the user until the token expires. An HTTP interceptor attaches `Authorization: Bearer <token>` on API calls when a session exists. Route guards (`authGuard`, `adminGuard`) hide Admin-only screens (create/edit); they are a UX layer only — the API still enforces roles. NgRx and similar libraries were not used: the app’s state is small (session plus per-screen HTTP data), and a service-based `BehaviorSubject` keeps the client lightweight while still providing reactive auth state.
+**ניהול מצב ב-Angular.** מצב האימות יושב ב-`AuthService` כ-`BehaviorSubject`, כדי שהמעטפת והנתיבים יגיבו להתחברות ולהתנתקות בלי store גלובלי. הסשן הנוכחי (JWT, שם משתמש, תפקיד, תפוגה) נשמר ב-`localStorage` כדי שרענון יחזיר את המשתמש עד שפג תוקף הטוקן. interceptor של HTTP מוסיף `Authorization: Bearer <token>` לקריאות API כשיש סשן. שומרי נתיב (`authGuard`, `adminGuard`) מסתירים מסכי Admin (יצירה/עריכה); זו שכבת UX בלבד — ה-API עדיין אוכף תפקידים. NgRx וספריות דומות לא בשימוש: מצב האפליקציה קטן (סשן ונתון HTTP לכל מסך), ו-`BehaviorSubject` בשירות שומר על הלקוח קל ועדיין מספק מצב אימות ריאקטיבי.
 
-## Background processing
+## עיבוד ברקע
 
-A `BackgroundService` (`ReminderProcessorHostedService`) runs for the lifetime of the API process. It is the right fit here: one in-process worker, no extra infrastructure, and built-in `CancellationToken` support for shutdown.
+`BackgroundService` בשם `ReminderProcessorHostedService` רץ לאורך חיי תהליך ה-API. זה מתאים כאן: עובד יחיד בתוך התהליך, בלי תשתיות נוספות, ותמיכה מובנית ב-`CancellationToken` לכיבוי.
 
-**Polling.** About every second it opens a DI scope and asks `ReminderExecutionService` for eligible reminders:
+**סריקה (polling).** בערך כל שנייה נפתח scope של DI, ו-`ReminderExecutionService` מתבקש לתזכורות זכאיות:
 
 - `IsActive == true`
 - `Status == Pending`
 - `ScheduledAt <= DateTime.UtcNow`
 - `FutureRunsCount > 0`
 
-**Claim before wait.** Each eligible reminder is claimed **sequentially** in that cycle: `Pending` → `Running`, a `ReminderExecution` row is created with `Status = Running` and `StartedAt` (UTC), and `SaveChangesAsync` runs **before** the next reminder is claimed and **before** any 10-second wait. Because only one writer polls, that persisted claim is enough to stop the same reminder from being picked again while it is `Running`. No extra locks, tokens, or brokers are used. Each cycle runs stale-execution recovery **before** claiming, in the same DI scope.
+**תפיסה לפני המתנה (claim before wait).** כל תזכורת זכאית נתפסת **ברצף** באותו מחזור: `Pending` → `Running`, נוצרת שורת `ReminderExecution` עם `Status = Running` ו-`StartedAt` (UTC), ו-`SaveChangesAsync` רץ **לפני** תפיסת התזכורת הבאה ו**לפני** כל המתנה של 10 שניות. מכיוון שרק כותב אחד סוקר, התפיסה שנשמרה מספיקה כדי שהתזכורת לא תיבחר שוב כל עוד היא `Running`. אין מנעולים, טוקנים או ברוקרים נוספים. כל מחזור מריץ שחזור ביצועים תקועים **לפני** התפיסה, באותו scope של DI.
 
-**Crash recovery.** If the process dies during the simulated wait, a reminder can remain `Running` with an execution that has no `CompletedAt`. Those rows are ignored by the normal eligibility filter. Recovery looks only for executions that are still `Running`, have no `CompletedAt`, and whose `StartedAt` is older than the stale threshold (UTC). It marks that execution `Failed` (with `CompletedAt`), sets the reminder back to `Pending` when it is still `Running`, and does **not** change `FutureRunsCount`, `ScheduledAt`, or `IsActive`. Recurrence therefore stays intact; the next claim is a new attempt. Recovery is idempotent. In-Memory data is still lost on process exit; recovery matters if the same in-memory process leaves orphans after an exception, or if a durable database is used later.
+**שחזור אחרי קריסה.** אם התהליך מת במהלך ההמתנה המדומה, תזכורת יכולה להישאר `Running` עם ביצוע בלי `CompletedAt`. שורות כאלה מדולגות על ידי מסנן הזכאות הרגיל. השחזור מחפש רק ביצועים שעדיין `Running`, בלי `CompletedAt`, ושה-`StartedAt` שלהם ישן מהסף (UTC). הוא מסמן את הביצוע כ-`Failed` (עם `CompletedAt`), מחזיר את התזכורת ל-`Pending` אם היא עדיין `Running`, ו**אינו** משנה `FutureRunsCount`, `ScheduledAt` או `IsActive`. המחזוריות נשמרת; התפיסה הבאה היא ניסיון חדש. השחזור אידמפוטנטי. נתוני In-Memory עדיין נמחקים ביציאת התהליך; השחזור רלוונטי אם אותו תהליך in-memory משאיר יתומים אחרי חריגה, או אם בעתיד ייעשה שימוש במסד עמיד.
 
-**Concurrent simulation.** After all claims in the cycle are saved, each claimed reminder’s 10-second simulated send runs **concurrently** (`Task.WhenAll`). Each task creates a **new DI scope** via `IServiceScopeFactory` and therefore a **new `DbContext`**. `DbContext` is not shared across threads.
+**סימולציה במקביל.** אחרי שכל התפיסות במחזור נשמרו, השליחה המדומה של 10 שניות לכל תזכורת שנתפסה רצה **במקביל** (`Task.WhenAll`). כל משימה יוצרת **scope חדש** של DI דרך `IServiceScopeFactory` ולכן **`DbContext` חדש**. אין שיתוף `DbContext` בין threads.
 
-**State transitions.**
+**מעברי מצב.**
 
-- Claim: reminder `Pending` → `Running`; execution `Running` with `StartedAt`.
-- After the 10-second wait, the simulated result is randomly `Success` or `Failed`.
-- The execution gets `CompletedAt` and that final status.
-- **Once:** `FutureRunsCount = 0`, `IsActive = false`, reminder status stays `Success` or `Failed` (not reset to `Pending`). It will not run again.
-- **Daily / Weekly / Monthly:** `FutureRunsCount` decreases by 1 (including on failure). If it remains `> 0`, `ScheduledAt` moves +1 day / +7 days / +1 calendar month and status returns to `Pending`. If it reaches `0`, there is no next run; status stays `Success` or `Failed` and **`IsActive` is set to `false`** so the UI active flag matches “no remaining runs”.
+- תפיסה: תזכורת `Pending` → `Running`; ביצוע `Running` עם `StartedAt`.
+- אחרי המתנת 10 השניות, התוצאה המדומה היא באקראי `Success` או `Failed`.
+- לביצוע נקבעים `CompletedAt` והסטטוס הסופי.
+- **Once:** `FutureRunsCount = 0`, `IsActive = false`, סטטוס התזכורת נשאר `Success` או `Failed` (לא חוזר ל-`Pending`). היא לא תרוץ שוב.
+- **Daily / Weekly / Monthly:** `FutureRunsCount` יורד ב-1 (גם בכשל). אם נשאר `> 0`, `ScheduledAt` מתקדם ביום / 7 ימים / חודש לוח שנה, והסטטוס חוזר ל-`Pending`. אם מגיעים ל-`0`, אין ריצה הבאה; הסטטוס נשאר `Success` או `Failed` ו-**`IsActive` נקבע ל-`false`** כדי שדגל הפעילות בממשק יתאים ל־«אין ריצות נותרות».
 
-**FutureRunsCount** is only consumed when an execution actually runs (claim + simulated send). It is not derived from frequency.
+**FutureRunsCount** נצרך רק כשביצוע באמת רץ (תפיסה + שליחה מדומה). הוא אינו נגזר מהתדירות.
 
-**Cancellation.** `Task.Delay` uses the hosted-service stopping token. `OperationCanceledException` from shutdown is not caught and rewritten as `Failed` at that moment. If the process keeps running or later restarts with persisted data, a `Running` execution older than the stale threshold is recovered as Failed and the reminder returns to Pending without consuming `FutureRunsCount`.
+**ביטול.** `Task.Delay` משתמש בטוקן העצירה של שירות הרקע. `OperationCanceledException` מכיבוי אינו נתפס ומשוכתב כ-`Failed` באותו רגע. אם התהליך ממשיך לרוץ או עולה מאוחר יותר עם נתונים שנשמרו, ביצוע `Running` ישן מהסף משוחזר כ-Failed והתזכורת חוזרת ל-Pending בלי לצרוך `FutureRunsCount`.
 
-**Isolation.** Claiming a reminder and completing a simulated send are each wrapped so one reminder’s unexpected exception is logged and does not stop the poll loop or other concurrent simulations.
+**בידוד.** תפיסת תזכורת והשלמת שליחה מדומה עטופות כך שחריגה לא צפויה של תזכורת אחת נרשמת בלוג ואינה עוצרת את לולאת הסריקה או סימולציות מקבילות אחרות.
 
-**Concurrency and scale.** This take-home uses EF Core In-Memory and a **single** hosted processor in one process. Duplicate claiming is not expected in that setup: the worker claims sequentially, and In-Memory state is not shared across processes. A production deployment with multiple app instances and a shared persistent database would need an atomic claim (for example `UPDATE … WHERE Status = Pending`) and/or distributed locking so two nodes cannot run the same reminder. That is intentionally out of scope. Crash recovery only repairs stale `Running` executions; it is **not** a distributed lock.
+**מקביליות וסקייל.** משימת הבית הזו משתמשת ב-EF Core In-Memory ובמעבד hosted **יחיד** בתהליך אחד. תפיסה כפולה אינה צפויה במצב הזה: העובד תופס ברצף, ומצב In-Memory אינו משותף בין תהליכים. פריסת ייצור עם כמה מופעי אפליקציה ומסד משותף ועמיד תדרוש תפיסה אטומית (למשל `UPDATE … WHERE Status = Pending`) ו/או מנעול מבוזר כדי ששני צמתים לא יריצו את אותה תזכורת. זה מחוץ להיקף במכוון. שחזור אחרי קריסה מתקן רק ביצועי `Running` תקועים; הוא **אינו** מנעול מבוזר.
 
-## Time handling
+## טיפול בזמן
 
-The backend uses **UTC** for scheduling and persistence. Incoming `ScheduledAt` values are normalized to UTC. Eligibility compares `ScheduledAt` to `DateTime.UtcNow`. Execution `StartedAt` / `CompletedAt` and reminder `CreatedAt` / `UpdatedAt` are UTC.
+ה-backend משתמש ב-**UTC** לתיזמון ולשמירה. ערכי `ScheduledAt` נכנסים מנורמלים ל-UTC. הזכאות משווה את `ScheduledAt` ל-`DateTime.UtcNow`. `StartedAt` / `CompletedAt` של ביצוע ו-`CreatedAt` / `UpdatedAt` של תזכורת הם UTC.
 
-## Execution history
+## היסטוריית ביצוע
 
-Every actual execution attempt creates one `ReminderExecution` (including Failed attempts). `GET /api/reminders/{id}/executions` is available to Admin and Viewer, returns 404 if the reminder does not exist, and orders by `StartedAt` descending (most recent first). The API returns DTOs (`Id`, `ReminderId`, `StartedAt`, `CompletedAt`, `Status`), not EF entities.
+כל ניסיון ביצוע אמיתי יוצר `ReminderExecution` אחד (כולל ניסיונות Failed). `GET /api/reminders/{id}/executions` זמין ל-Admin ול-Viewer, מחזיר 404 אם התזכורת לא קיימת, ומסודר לפי `StartedAt` יורד (החדש ביותר ראשון). ה-API מחזיר DTOs (`Id`, `ReminderId`, `StartedAt`, `CompletedAt`, `Status`), לא ישויות EF.
 
-## Failure behavior
+## התנהגות כשל
 
-A simulated **Failed** result still counts as an execution: it is recorded, `FutureRunsCount` is decremented, and a recurring reminder is rescheduled if runs remain. There is **no automatic retry** of the same attempt.
+תוצאת **Failed** מדומה עדיין נספרת כביצוע: היא נרשמת, `FutureRunsCount` יורד, ותזכורת מחזורית מתוזמנת מחדש אם נשארו ריצות. **אין ניסיון חוזר אוטומטי** של אותו ניסיון.
 
-## Assumptions
+## הנחות
 
-- **`FutureRunsCount` is user-supplied.** It is **not** calculated from `Frequency` or `ScheduledAt`. Example: `Frequency = Daily` and `FutureRunsCount = 5` means five future executions are planned.
-- Failed executions consume a run the same way successful ones do; there is no retry of that attempt.
-- When `FutureRunsCount` reaches 0 (Once after its single run, or recurring after the last run), **`IsActive` is set to `false`**.
-- Once reminders do not reschedule; remaining `FutureRunsCount` is forced to 0 after the execution.
-- Supported **Frequency** values are `Once`, `Daily`, `Weekly`, and `Monthly`.
-- Reminder sending is **simulated only** (`Task.Delay` of 10 seconds, then a random Success/Failed). There is no email, SMS, or external notification provider.
-- New reminders always start with **`Status = Pending`**. Clients cannot set status on create or update.
-- `ScheduledAt` must be a valid `DateTime`; it is **not** required to be in the future. A past time is useful for local evaluation of the processor.
-- Name max length is 200 characters; message max length is 2000 characters; `FutureRunsCount` must be a non-negative integer.
-- Invalid credentials on login return **401 Unauthorized** without distinguishing unknown user vs wrong password.
-- In-Memory data is lost on process restart.
-- Angular UI restrictions are not a substitute for API authorization.
-- Shutdown during the simulated wait does not immediately mark the execution Failed. A `Running` execution with no `CompletedAt` older than `StaleRunningThresholdSeconds` is recovered as Failed and the reminder returns to Pending without decrementing `FutureRunsCount`.
+- **`FutureRunsCount` מסופק על ידי המשתמש.** הוא **אינו** מחושב מ-`Frequency` או מ-`ScheduledAt`. דוגמה: `Frequency = Daily` ו-`FutureRunsCount = 5` פירושם חמישה ביצועים עתידיים מתוכננים.
+- ביצועים שנכשלו צורכים ריצה כמו ביצועים שהצליחו; אין ניסיון חוזר של אותו ניסיון.
+- כש-`FutureRunsCount` מגיע ל-0 (Once אחרי הריצה היחידה, או מחזורי אחרי הריצה האחרונה), **`IsActive` נקבע ל-`false`**.
+- תזכורות Once לא מתוזמנות מחדש; `FutureRunsCount` הנותר נכפה ל-0 אחרי הביצוע.
+- ערכי **Frequency** נתמכים: `Once`, `Daily`, `Weekly`, `Monthly`.
+- שליחת תזכורת היא **סימולציה בלבד** (`Task.Delay` של 10 שניות, ואז Success/Failed אקראי). אין אימייל, SMS או ספק התראות חיצוני.
+- תזכורות חדשות תמיד מתחילות עם **`Status = Pending`**. הלקוח אינו יכול לקבוע סטטוס ביצירה או בעדכון.
+- `ScheduledAt` חייב להיות `DateTime` תקין; **אין** חובה שיהיה בעתיד. זמן בעבר שימושי לבדיקה מקומית של המעבד.
+- אורך מקסימלי לשם: 200 תווים; להודעה: 2000 תווים; `FutureRunsCount` חייב להיות מספר שלם לא-שלילי.
+- פרטי התחברות שגויים מחזירים **401 Unauthorized** בלי להבחין בין משתמש לא קיים לסיסמה שגויה.
+- נתוני In-Memory נמחקים בהפעלה מחדש של התהליך.
+- הגבלות ממשק Angular אינן תחליף להרשאה ב-API.
+- כיבוי במהלך ההמתנה המדומה אינו מסמן מיד את הביצוע כ-Failed. ביצוע `Running` בלי `CompletedAt` ישן מ-`StaleRunningThresholdSeconds` משוחזר כ-Failed והתזכורת חוזרת ל-Pending בלי להקטין את `FutureRunsCount`.
 
-## AI Usage Disclosure
+## גילוי שימוש ב-AI
 
-AI development tools were used during implementation, including **Cursor**. They assisted with planning, scaffolding, code generation, refactoring, and debugging. The submitted solution was reviewed and understood by the developer; AI assistance did not replace ownership of the design or the code.
+במהלך המימוש נעשה שימוש בכלי פיתוח מבוססי AI, כולל **Cursor**. הם סייעו בתכנון, פיגום, יצירת קוד, רפקטורינג ודיבוג. הפתרון שהוגש נסקר והובן על ידי המפתחת; סיוע ה-AI לא החליף בעלות על העיצוב או על הקוד.
 
-## API endpoints
+## נקודות קצה של ה-API
 
-| Method | Path | Roles |
+| Method | Path | תפקידים |
 |--------|------|--------|
-| POST | `/api/auth/login` | Anonymous |
+| POST | `/api/auth/login` | אנונימי |
 | GET | `/api/reminders` | Admin, Viewer |
 | GET | `/api/reminders/{id}` | Admin, Viewer |
 | GET | `/api/reminders/{id}/executions` | Admin, Viewer |
